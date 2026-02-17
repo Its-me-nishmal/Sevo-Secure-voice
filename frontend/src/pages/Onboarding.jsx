@@ -20,7 +20,7 @@ const Onboarding = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0d1117] flex items-center justify-center p-6 w-full">
+    <div className="min-h-[100dvh] bg-[#0d1117] flex items-center justify-center p-6 w-full supports-[height:100cqh]:min-h-[100cqh] supports-[height:100svh]:min-h-[100svh]">
       <div className="max-w-sm w-full glass-card p-8 space-y-8 text-center animate-in slide-in-from-bottom-4 duration-500">
         <div className="w-16 h-16 bg-[#41D1FF]/10 rounded-2xl mx-auto flex items-center justify-center text-[#41D1FF]">
             <UserCheck size={32} />

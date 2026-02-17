@@ -11,7 +11,7 @@ const Settings = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0d1117] text-white flex flex-col max-w-lg mx-auto border-x border-white/10 shadow-2xl">
+    <div className="flex flex-col h-full bg-[#0d1117] text-white">
       <div className="p-6 flex items-center gap-4 glass-navbar">
         <button onClick={() => navigate(-1)} className="p-2 hover:bg-white/10 rounded-full">
           <ArrowLeft size={20} />

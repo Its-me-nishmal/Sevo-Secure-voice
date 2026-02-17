@@ -21,7 +21,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0d1117] flex items-center justify-center p-6 w-full">
+    <div className="min-h-[100dvh] bg-[#0d1117] flex items-center justify-center p-6 w-full supports-[height:100cqh]:min-h-[100cqh] supports-[height:100svh]:min-h-[100svh]">
       <div className="max-w-sm w-full space-y-12 text-center animate-in fade-in zoom-in duration-500">
         
         {/* Logo Section */}
