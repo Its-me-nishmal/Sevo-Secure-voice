@@ -6,6 +6,7 @@ import { io } from 'socket.io-client';
 import { useAuth } from '../context/AuthContext';
 import VoiceRecorder from '../components/VoiceRecorder';
 import VoicePlayer from '../components/VoicePlayer';
+import { API_BASE_URL, SOCKET_URL } from '../config';
 
 const Chat = () => {
   const { id } = useParams();
@@ -16,11 +17,11 @@ const Chat = () => {
   const socket = useRef(null);
   const scrollRef = useRef(null);
 
-  const API_URL = 'http://localhost:5000/api';
+  const API_URL = `${API_BASE_URL}/api`;
 
   useEffect(() => {
     // Initialize Socket
-    socket.current = io('http://localhost:5000');
+    socket.current = io(SOCKET_URL);
     socket.current.emit('join_conversation', id);
 
     socket.current.on('new_message', (message) => {

@@ -5,6 +5,7 @@ import axios from 'axios';
 import { io } from 'socket.io-client';
 import { useAuth } from '../context/AuthContext';
 import VoiceRecorder from '../components/VoiceRecorder';
+import { API_BASE_URL, SOCKET_URL } from '../config';
 
 const Home = () => {
   const { user, logout } = useAuth();
@@ -15,11 +16,11 @@ const Home = () => {
   const [isSearching, setIsSearching] = useState(false);
   const socket = useRef(null);
 
-  const API_URL = 'http://localhost:5000/api';
+  const API_URL = `${API_BASE_URL}/api`;
 
   useEffect(() => {
     // Personal room for refresh events
-    socket.current = io('http://localhost:5000');
+    socket.current = io(SOCKET_URL);
     socket.current.emit('join_personal', user._id);
 
     socket.current.on('refresh_conversations', () => {
