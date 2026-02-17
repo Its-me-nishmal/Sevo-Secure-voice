@@ -71,100 +71,118 @@ const Home = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-[#0d1117] text-white max-w-lg mx-auto border-x border-white/10 shadow-2xl overflow-hidden">
+    <div className="flex flex-col min-h-full">
       {/* Header */}
-      <div className="p-6 flex items-center justify-between glass-navbar">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 primary-gradient rounded-full flex items-center justify-center font-bold text-lg">
-            {user.displayName?.[0] || 'S'}
-          </div>
-          <div>
-            <h1 className="text-xl font-bold">Sevo</h1>
-            <p className="text-xs text-white/50">Welcome back, {user.displayName}</p>
-          </div>
+      <div className="pt-8 pb-4 px-6 flex items-center justify-between sticky top-0 bg-[#0d1117]/80 backdrop-blur-md z-20">
+        <div>
+            <h1 className="text-2xl font-black bg-clip-text text-transparent primary-gradient">Sevo</h1>
+            <p className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-bold">Encrypted Voice</p>
         </div>
-        <div className="flex gap-2">
-            <button onClick={() => navigate('/settings')} className="p-2 hover:bg-white/10 rounded-full transition-colors">
-                <SettingsIcon size={20} className="text-white/70" />
-            </button>
-            <button onClick={logout} className="p-2 hover:bg-red-500/10 rounded-full transition-colors group">
-                <LogOut size={20} className="text-white/70 group-hover:text-red-400" />
-            </button>
+        <div className="flex items-center gap-3">
+            <div className="w-9 h-9 border border-white/10 rounded-full flex items-center justify-center p-[2px]">
+                <div className="w-full h-full primary-gradient rounded-full flex items-center justify-center font-bold text-xs">
+                   {user.displayName?.[0] || 'S'}
+                </div>
+            </div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-6">
-        {/* Search */}
-        <div className="space-y-4">
-            <form onSubmit={handleSearch} className="relative">
-                <input 
-                    type="text" 
-                    placeholder="Find user by email..." 
-                    className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-11 pr-4 focus:outline-none focus:border-[#41D1FF] transition-colors"
-                    value={searchEmail}
-                    onChange={(e) => setSearchEmail(e.target.value)}
-                />
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" size={18} />
-                <button type="submit" hidden disabled={isSearching}>Search</button>
-            </form>
+      {/* Hero / Action */}
+      <div className="px-6 mb-6">
+          <div className="glass-card p-5 relative overflow-hidden group active:scale-[0.98] transition-all">
+              <div className="absolute top-[-20%] right-[-10%] w-32 h-32 bg-[#41D1FF]/10 blur-2xl rounded-full" />
+              <div className="relative z-10">
+                  <h2 className="text-lg font-bold mb-1">Encrypted Audio</h2>
+                  <p className="text-xs text-white/50 mb-4 leading-relaxed">Your voice messages are encrypted end-to-end and expire automatically.</p>
+                  <form onSubmit={handleSearch} className="relative">
+                      <input 
+                          type="text" 
+                          placeholder="Search users..." 
+                          className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-11 pr-4 text-sm focus:outline-none focus:border-[#41D1FF] transition-all"
+                          value={searchEmail}
+                          onChange={(e) => setSearchEmail(e.target.value)}
+                      />
+                      <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" size={16} />
+                  </form>
+              </div>
+          </div>
+      </div>
 
-            {searchResult && (
+      {/* Main Content */}
+      <div className="px-6 space-y-6 flex-1">
+        {/* Search Results */}
+        {searchResult && (
+            <div className="animate-in fade-in slide-in-from-top-4 duration-300">
+                <h3 className="text-[10px] font-bold text-white/20 uppercase tracking-widest px-1 mb-3">Search Result</h3>
                 <div 
                     onClick={() => startChat(searchResult._id)}
-                    className="glass-card p-4 flex items-center justify-between cursor-pointer hover:bg-white/10 border-[#41D1FF]/30 animate-in fade-in slide-in-from-top-2"
+                    className="glass-card p-4 flex items-center justify-between cursor-pointer border-[#41D1FF]/20 bg-[#41D1FF]/5 hover:bg-[#41D1FF]/10 transition-colors"
                 >
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center">
-                            <UserIcon size={20} />
+                        <div className="w-10 h-10 primary-gradient rounded-full flex items-center justify-center">
+                            <span className="font-bold">{searchResult.displayName[0]}</span>
                         </div>
                         <div>
-                            <p className="font-semibold">{searchResult.displayName}</p>
-                            <p className="text-xs text-white/40">{searchResult.email}</p>
+                            <p className="font-semibold text-sm">{searchResult.displayName}</p>
+                            <p className="text-[10px] text-white/30">{searchResult.email}</p>
                         </div>
                     </div>
-                    <MessageSquare size={18} className="text-[#41D1FF]" />
+                    <div className="w-8 h-8 bg-[#41D1FF]/20 rounded-lg flex items-center justify-center">
+                        <MessageSquare size={16} className="text-[#41D1FF]" />
+                    </div>
                 </div>
-            )}
-        </div>
+            </div>
+        )}
 
         {/* Conversations List */}
-        <div className="space-y-3">
-            <h3 className="text-xs font-bold text-white/30 uppercase tracking-widest px-1">Recent Chats</h3>
+        <div className="space-y-4">
+            <div className="flex items-center justify-between px-1">
+                <h3 className="text-[10px] font-bold text-white/20 uppercase tracking-[0.2em]">Latest Conversations</h3>
+                <span className="text-[10px] text-white/20">{conversations.length} total</span>
+            </div>
+            
             {conversations.length === 0 ? (
-                <div className="text-center py-10 opacity-30">
-                    <Mic size={48} className="mx-auto mb-3" />
-                    <p>No messages yet. Start a new chat!</p>
+                <div className="flex flex-col items-center justify-center py-20 opacity-20 grayscale">
+                    <Mic size={56} strokeWidth={1} />
+                    <p className="mt-4 text-sm tracking-wide">Silence is golden...</p>
                 </div>
             ) : (
-                conversations.map(conv => {
-                    const other = conv.userA._id === user._id ? conv.userB : conv.userA;
-                    return (
-                        <div 
-                            key={conv._id} 
-                            onClick={() => navigate(`/chat/${conv._id}`)}
-                            className="glass-card p-4 flex items-center justify-between cursor-pointer hover:bg-white/10 transition-colors"
-                        >
-                            <div className="flex items-center gap-3">
-                                <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center border border-white/10">
-                                    <span className="font-bold text-lg text-white/80">{other.displayName?.[0] || '?'}</span>
+                <div className="grid gap-3 pb-8">
+                    {conversations.map(conv => {
+                        const other = conv.userA._id === user._id ? conv.userB : conv.userA;
+                        return (
+                            <div 
+                                key={conv._id} 
+                                onClick={() => navigate(`/chat/${conv._id}`)}
+                                className="group flex items-center gap-4 p-4 glass-card hover:bg-white/10 active:scale-[0.99] transition-all cursor-pointer"
+                            >
+                                <div className="relative">
+                                    <div className="w-12 h-12 primary-gradient rounded-2xl flex items-center justify-center shadow-lg shadow-black/20 overflow-hidden">
+                                        <span className="font-bold text-lg text-white drop-shadow-md">{other.displayName?.[0] || '?'}</span>
+                                    </div>
+                                    {conv.unplayedCount > 0 && (
+                                        <div className="absolute -top-1 -right-1 w-5 h-5 bg-[#41D1FF] rounded-full border-2 border-[#0d1117] flex items-center justify-center text-[10px] font-black text-[#0d1117]">
+                                            {conv.unplayedCount}
+                                        </div>
+                                    )}
                                 </div>
-                                <div>
-                                    <p className="font-semibold">{other.displayName}</p>
-                                    <div className="flex items-center gap-1.5">
-                                        <div className={`w-1.5 h-1.5 rounded-full ${conv.unplayedCount > 0 ? 'bg-[#41D1FF]' : 'bg-white/10'}`} />
-                                        <p className={`text-xs ${conv.unplayedCount > 0 ? 'text-[#41D1FF]' : 'text-white/40'}`}>
-                                            {conv.unplayedCount > 0 ? `${conv.unplayedCount} new message${conv.unplayedCount > 1 ? 's' : ''}` : 'All played'}
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-center justify-between mb-0.5">
+                                        <p className="font-bold text-sm truncate">{other.displayName}</p>
+                                        <p className="text-[9px] text-white/20 font-medium">
+                                            {new Date(conv.updatedAt).toLocaleDateString([], { month: 'short', day: 'numeric' })}
                                         </p>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <div className={`text-[11px] truncate ${conv.unplayedCount > 0 ? 'text-[#41D1FF] font-medium' : 'text-white/40 font-normal'}`}>
+                                            {conv.unplayedCount > 0 ? `Incoming voice message` : 'Message played'}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <div className="text-right">
-                                <p className="text-[10px] text-white/30">{new Date(conv.updatedAt).toLocaleDateString([], { month: 'short', day: 'numeric' })}</p>
-                            </div>
-                        </div>
-                    );
-                })
+                        );
+                    })}
+                </div>
             )}
         </div>
       </div>

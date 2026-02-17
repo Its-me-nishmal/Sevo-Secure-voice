@@ -87,55 +87,75 @@ const Chat = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-[#0d1117] text-white overflow-hidden max-w-lg mx-auto border-x border-white/10 shadow-2xl">
+    <div className="flex flex-col h-full relative">
       {/* Header */}
-      <div className="p-4 flex items-center justify-between glass-navbar z-10">
-        <div className="flex items-center gap-3">
-          <button onClick={() => navigate('/')} className="p-2 hover:bg-white/10 rounded-full">
-            <ArrowLeft size={20} />
+      <div className="pt-8 pb-4 px-4 flex items-center justify-between glass-navbar sticky top-0 z-30">
+        <div className="flex items-center gap-1">
+          <button onClick={() => navigate('/')} className="p-2 -ml-2 text-white/60 hover:text-white transition-colors">
+            <ArrowLeft size={22} />
           </button>
-          <div>
-            <h2 className="font-semibold">Chat</h2>
-            <p className="text-[10px] text-white/40 uppercase tracking-widest font-bold">Encrypted</p>
+          <div className="flex items-center gap-3 ml-2">
+            <div className="w-10 h-10 primary-gradient rounded-xl flex items-center justify-center font-bold text-shadow">
+               C
+            </div>
+            <div>
+              <h2 className="font-bold text-sm leading-none mb-1">Secure Chat</h2>
+              <div className="flex items-center gap-1">
+                <div className="w-1.5 h-1.5 bg-[#41D1FF] rounded-full animate-pulse" />
+                <p className="text-[10px] text-white/40 uppercase tracking-widest font-black">End-to-End</p>
+              </div>
+            </div>
           </div>
         </div>
-        <button className="p-2 hover:bg-white/10 rounded-full">
+        <button className="p-2 text-white/40 hover:text-white transition-colors">
           <MoreVertical size={20} />
         </button>
       </div>
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-6">
-        {messages.map((msg, index) => {
-          const isMe = msg.senderId === user._id;
-          return (
-            <div key={msg._id || index} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
-              <div className="max-w-[85%] space-y-1">
-                <VoicePlayer 
-                    audioUrl={`${API_URL}/messages/${msg._id}/file`} 
-                    duration={msg.durationSeconds}
-                    onPlay={() => !isMe && !msg.played && markPlayed(msg._id)}
-                />
-                <div className={`flex items-center gap-2 px-1 ${isMe ? 'flex-row-reverse' : ''}`}>
-                    <span className="text-[10px] text-white/40">
-                        {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </span>
-                    {msg.played && (
-                        <span className="text-[10px] text-[#41D1FF] font-medium italic">Played</span>
-                    )}
-                </div>
-              </div>
+      <div className="flex-1 overflow-y-auto px-6 py-6 space-y-8 scroll-smooth pb-32">
+        {messages.length === 0 ? (
+            <div className="h-full flex flex-col items-center justify-center opacity-20 text-center px-10">
+                <ShieldAlert size={48} strokeWidth={1} className="mb-4" />
+                <p className="text-xs leading-relaxed uppercase tracking-widest font-bold">This conversation is encrypted and will vanish shortly.</p>
             </div>
-          );
-        })}
+        ) : (
+            messages.map((msg, index) => {
+              const isMe = msg.senderId === user._id;
+              return (
+                <div key={msg._id || index} className={`flex ${isMe ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2 duration-300`}>
+                  <div className={`max-w-[90%] space-y-1 ${isMe ? 'items-end' : 'items-start'} flex flex-col`}>
+                    <VoicePlayer 
+                        audioUrl={`${API_URL}/messages/${msg._id}/file`} 
+                        duration={msg.durationSeconds}
+                        onPlay={() => !isMe && !msg.played && markPlayed(msg._id)}
+                    />
+                    <div className={`flex items-center gap-2 px-1 ${isMe ? 'flex-row-reverse' : ''}`}>
+                        <span className="text-[9px] text-white/30 font-medium">
+                            {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                        {msg.played && (
+                            <div className="flex items-center gap-1">
+                                <span className="w-1 h-1 bg-[#41D1FF] rounded-full" />
+                                <span className="text-[9px] text-[#41D1FF] font-bold uppercase tracking-tighter italic">Played</span>
+                            </div>
+                        )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+        )}
         <div ref={scrollRef} />
       </div>
 
-      {/* Input Area */}
-      <div className="p-4 bg-gradient-to-t from-[#0d1117] to-transparent">
-        <VoiceRecorder onSend={handleSendVoice} />
-        <p className="text-center text-[10px] text-white/30 mt-3 flex items-center justify-center gap-1">
-            <ShieldAlert size={12} /> Messages expire in 3 hours
+      {/* Floating Input Area */}
+      <div className="absolute bottom-6 left-6 right-6 z-40">
+        <div className="glass-card shadow-2xl p-2 bg-[#0d1117]/40 backdrop-blur-xl border-white/5">
+            <VoiceRecorder onSend={handleSendVoice} />
+        </div>
+        <p className="text-center text-[9px] text-white/20 mt-4 flex items-center justify-center gap-1.5 font-medium tracking-wide">
+            <ShieldAlert size={10} className="text-[#BD34FE]" /> AUTO-DESTRUCTS IN 3 HOURS
         </p>
       </div>
     </div>
