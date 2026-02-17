@@ -14,6 +14,8 @@ const Home = () => {
   const [searchEmail, setSearchEmail] = useState('');
   const [searchResult, setSearchResult] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
+  const searchInputRef = useRef(null);
   const socket = useRef(null);
 
   const API_URL = `${API_BASE_URL}/api`;
@@ -78,32 +80,45 @@ const Home = () => {
           <h1 className="text-2xl font-black bg-clip-text text-transparent primary-gradient">Sevo</h1>
           <p className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-bold">Encrypted Voice</p>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 border border-white/10 rounded-full flex items-center justify-center p-[2px]">
+        <div className="flex items-center gap-4">
+          <div className={`flex items-center bg-white/5 border border-white/10 rounded-lg px-2 py-1 ${showSearch ? 'w-48 opacity-100' : 'w-0 opacity-0'} transition-none overflow-hidden`}>
+            <input
+              ref={searchInputRef}
+              type="text"
+              placeholder="Search..."
+              className="bg-transparent border-none outline-none text-xs w-full"
+              value={searchEmail}
+              onChange={(e) => setSearchEmail(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch(e)}
+            />
+          </div>
+          <button className="text-white/60 hover:text-white" onClick={() => {
+            setShowSearch(!showSearch);
+            if (!showSearch) setTimeout(() => searchInputRef.current?.focus(), 10);
+          }}>
+            <Search size={20} />
+          </button>
+          <button className="text-white/60 hover:text-white" onClick={() => setSearchResult(null)}>
+            <MessageSquare size={20} />
+          </button>
+          <button
+            onClick={() => navigate('/settings')}
+            className="w-9 h-9 border border-white/10 rounded-full flex items-center justify-center p-[2px] transition-none active:scale-95"
+          >
             <div className="w-full h-full primary-gradient rounded-full flex items-center justify-center font-bold text-xs">
               {user.displayName?.[0] || 'S'}
             </div>
-          </div>
+          </button>
         </div>
       </div>
 
       {/* Hero / Action */}
       <div className="px-6 mb-6">
-        <div className="glass-card p-5 relative overflow-hidden group active:scale-[0.98] transition-all">
+        <div className="glass-card p-5 relative overflow-hidden group">
           <div className="absolute top-[-20%] right-[-10%] w-32 h-32 bg-[#41D1FF]/10 blur-2xl rounded-full" />
           <div className="relative z-10">
             <h2 className="text-lg font-bold mb-1">Encrypted Audio</h2>
-            <p className="text-xs text-white/50 mb-4 leading-relaxed">Your voice messages are encrypted end-to-end and expire automatically.</p>
-            <form onSubmit={handleSearch} className="relative">
-              <input
-                type="text"
-                placeholder="Search users..."
-                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-11 pr-4 text-sm focus:outline-none focus:border-[#41D1FF] transition-all"
-                value={searchEmail}
-                onChange={(e) => setSearchEmail(e.target.value)}
-              />
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" size={16} />
-            </form>
+            <p className="text-xs text-white/50 leading-relaxed">Your voice messages are encrypted end-to-end and expire automatically.</p>
           </div>
         </div>
       </div>
@@ -112,11 +127,11 @@ const Home = () => {
       <div className="px-6 space-y-6 flex-1">
         {/* Search Results */}
         {searchResult && (
-          <div className="animate-in fade-in slide-in-from-top-4 duration-300">
+          <div>
             <h3 className="text-[10px] font-bold text-white/20 uppercase tracking-widest px-1 mb-3">Search Result</h3>
             <div
               onClick={() => startChat(searchResult._id)}
-              className="glass-card p-4 flex items-center justify-between cursor-pointer border-[#41D1FF]/20 bg-[#41D1FF]/5 hover:bg-[#41D1FF]/10 transition-colors"
+              className="glass-card p-4 flex items-center justify-between cursor-pointer border-[#41D1FF]/20 bg-[#41D1FF]/5 hover:bg-[#41D1FF]/10"
             >
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 primary-gradient rounded-full flex items-center justify-center">
@@ -154,7 +169,7 @@ const Home = () => {
                   <div
                     key={conv._id}
                     onClick={() => navigate(`/chat/${conv._id}`)}
-                    className="group flex items-center gap-4 p-4 glass-card hover:bg-white/10 active:scale-[0.99] transition-all cursor-pointer"
+                    className="group flex items-center gap-4 p-4 glass-card hover:bg-white/10 active:opacity-80 cursor-pointer"
                   >
                     <div className="relative">
                       <div className="w-12 h-12 primary-gradient rounded-2xl flex items-center justify-center shadow-lg shadow-black/20 overflow-hidden">

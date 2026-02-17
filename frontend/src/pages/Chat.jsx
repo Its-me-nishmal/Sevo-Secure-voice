@@ -39,7 +39,7 @@ const Chat = () => {
   }, [id]);
 
   useEffect(() => {
-    scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
+    scrollRef.current?.scrollIntoView({ behavior: 'auto' });
   }, [messages]);
 
   const fetchMessages = async () => {
@@ -91,7 +91,7 @@ const Chat = () => {
       {/* Header */}
       <div className="pt-8 pb-4 px-4 flex items-center justify-between glass-navbar sticky top-0 z-30">
         <div className="flex items-center gap-1">
-          <button onClick={() => navigate('/')} className="p-2 -ml-2 text-white/60 hover:text-white transition-colors">
+          <button onClick={() => navigate('/')} className="p-2 -ml-2 text-white/60 hover:text-white">
             <ArrowLeft size={22} />
           </button>
           <div className="flex items-center gap-3 ml-2">
@@ -107,13 +107,13 @@ const Chat = () => {
             </div>
           </div>
         </div>
-        <button className="p-2 text-white/40 hover:text-white transition-colors">
+        <button className="p-2 text-white/40 hover:text-white">
           <MoreVertical size={20} />
         </button>
       </div>
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto px-3 py-4 space-y-6 scroll-smooth pb-32">
+      <div className="flex-1 overflow-y-auto px-3 py-4 space-y-6 pb-32">
         {messages.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center opacity-20 text-center px-10">
             <ShieldAlert size={48} strokeWidth={1} className="mb-4" />
@@ -123,7 +123,7 @@ const Chat = () => {
           messages.map((msg, index) => {
             const isMe = msg.senderId === user._id;
             return (
-              <div key={msg._id || index} className={`flex ${isMe ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2 duration-300`}>
+              <div key={msg._id || index} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
                 <div className={`max-w-[90%] space-y-1 ${isMe ? 'items-end' : 'items-start'} flex flex-col`}>
                   <VoicePlayer
                     audioUrl={`${API_URL}/messages/${msg._id}/file`}
