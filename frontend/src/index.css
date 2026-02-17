@@ -45,6 +45,10 @@ body {
   scrollbar-width: none;
 }
 
+#root {
+  width: 100%;
+}
+
 /* Prevent iOS zoom on inputs */
 input,
 select,
