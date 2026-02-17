@@ -31,8 +31,15 @@ const sendVoiceMessage = async (req, res) => {
 
         const encryptedBuffer = encrypt(req.file.buffer);
         const fileName = `${uuidv4()}.enc`;
+        const uploadsDir = path.resolve(__dirname, '..', 'uploads');
+        
+        // Ensure directory exists
+        if (!fs.existsSync(uploadsDir)) {
+            fs.mkdirSync(uploadsDir, { recursive: true });
+        }
+
         const filePath = path.join('uploads', fileName);
-        const fullPath = path.resolve(__dirname, '..', filePath);
+        const fullPath = path.join(uploadsDir, fileName);
 
         fs.writeFileSync(fullPath, encryptedBuffer);
 
