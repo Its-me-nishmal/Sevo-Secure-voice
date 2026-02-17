@@ -25,10 +25,17 @@ const conversationRoutes = require('./routes/conversationRoutes');
 
 // Middleware
 app.use(cors({
-    origin: ["http://localhost:5173", "https://sevo-secure-voice.onrender.com"],
+    origin: ["http://localhost:5173", "https://sevo-secure-voice-nine.vercel.app"],
     methods: ["GET", "POST", "PUT"],
     credentials: true
 }));
+
+// Set COOP header for Google Auth
+app.use((req, res, next) => {
+    res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+    next();
+});
+
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
@@ -38,7 +45,7 @@ const server = http.createServer(app);
 const { Server } = require('socket.io');
 const io = new Server(server, {
     cors: {
-        origin: ["http://localhost:5173", "https://sevo-secure-voice.onrender.com"],
+        origin: ["http://localhost:5173", "https://sevo-secure-voice-nine.vercel.app"],
         methods: ["GET", "POST"]
     }
 });
