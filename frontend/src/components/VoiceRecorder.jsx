@@ -7,7 +7,7 @@ const VoiceRecorder = ({ onSend }) => {
   const [previewUrl, setPreviewUrl] = useState(null);
   const [duration, setDuration] = useState(0);
   const [isPreviewPlaying, setIsPreviewPlaying] = useState(false);
-  
+
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
   const timerRef = useRef(null);
@@ -64,12 +64,12 @@ const VoiceRecorder = ({ onSend }) => {
   };
 
   const togglePreview = () => {
-      if(isPreviewPlaying) {
-          audioPreviewRef.current.pause();
-      } else {
-          audioPreviewRef.current.play();
-      }
-      setIsPreviewPlaying(!isPreviewPlaying);
+    if (isPreviewPlaying) {
+      audioPreviewRef.current.pause();
+    } else {
+      audioPreviewRef.current.play();
+    }
+    setIsPreviewPlaying(!isPreviewPlaying);
   };
 
   return (
@@ -80,7 +80,7 @@ const VoiceRecorder = ({ onSend }) => {
             <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${isRecording ? 'bg-red-500 animate-pulse' : 'bg-white/20'}`} />
             <span className="text-xs font-medium truncate">{isRecording ? `${duration}s` : 'Ready'}</span>
           </div>
-          
+
           <button
             onMouseDown={startRecording}
             onMouseUp={stopRecording}
@@ -90,32 +90,32 @@ const VoiceRecorder = ({ onSend }) => {
           >
             {isRecording ? <Square size={20} fill="white" className="text-white" /> : <Mic size={20} />}
           </button>
-          
+
           <div className="text-[10px] text-white/30 font-medium min-w-0 text-right">
-              {isRecording ? 'Recording...' : 'Hold & Speak'}
+            {isRecording ? 'Recording...' : 'Hold & Speak'}
           </div>
         </>
       ) : (
         <div className="flex items-center gap-4 w-full">
-           <button onClick={handleCancel} className="p-2 text-white/60 hover:text-white"><X size={20} /></button>
-           
-           <div className="flex-1 flex items-center gap-3 glass-card bg-white/5 p-2 rounded-xl">
-                <button onClick={togglePreview} className="text-white/80">
-                    {isPreviewPlaying ? <Pause size={18} /> : <Play size={18} />}
-                </button>
-                <div className="flex-1 h-1 bg-white/10 rounded-full overflow-hidden">
-                    <div className="h-full primary-gradient" style={{width: '30%'}} /> {/* Mock progress */}
-                </div>
-                <span className="text-xs font-mono">{duration}s</span>
-                <audio ref={audioPreviewRef} src={previewUrl} onEnded={() => setIsPreviewPlaying(false)} hidden />
-           </div>
+          <button onClick={handleCancel} className="p-2 text-white/60 hover:text-white"><X size={20} /></button>
 
-           <button 
-                onClick={handleSend}
-                className="p-3 rounded-full primary-gradient text-white shadow-lg hover:opacity-90"
-            >
-                <Send size={20} />
+          <div className="flex-1 flex items-center gap-3 glass-card bg-white/5 p-2 rounded-xl">
+            <button onClick={togglePreview} className="text-white/80">
+              {isPreviewPlaying ? <Pause size={18} /> : <Play size={18} />}
             </button>
+            <div className="flex-1 h-1 bg-white/10 rounded-full overflow-hidden">
+              <div className="h-full primary-gradient" style={{ width: '30%' }} /> {/* Mock progress */}
+            </div>
+            <span className="text-xs font-mono">{duration}s</span>
+            <audio ref={audioPreviewRef} src={previewUrl} onEnded={() => setIsPreviewPlaying(false)} hidden />
+          </div>
+
+          <button
+            onClick={handleSend}
+            className="p-3 rounded-full primary-gradient text-white shadow-lg hover:opacity-90"
+          >
+            <Send size={20} />
+          </button>
         </div>
       )}
     </div>

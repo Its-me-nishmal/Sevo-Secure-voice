@@ -16,7 +16,7 @@ const PrivateRoute = ({ children, hideNav }) => {
       Loading Sevo...
     </div>
   );
-  
+
   if (!user) return <Navigate to="/login" />;
 
   // Force onboarding if display name is missing
