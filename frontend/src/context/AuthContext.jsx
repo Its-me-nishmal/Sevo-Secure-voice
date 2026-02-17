@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../config';
 
 const AuthContext = createContext();
 
@@ -7,7 +8,7 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    const API_URL = 'http://localhost:5000/api';
+    const API_URL = `${API_BASE_URL}/api`;
 
     useEffect(() => {
         const storedUser = localStorage.getItem('sevo_user');

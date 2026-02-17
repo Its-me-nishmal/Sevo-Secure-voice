@@ -24,7 +24,11 @@ const messageRoutes = require('./routes/messageRoutes');
 const conversationRoutes = require('./routes/conversationRoutes');
 
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin: ["http://localhost:5173", "https://sevo-secure-voice.onrender.com"],
+    methods: ["GET", "POST", "PUT"],
+    credentials: true
+}));
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
@@ -34,7 +38,7 @@ const server = http.createServer(app);
 const { Server } = require('socket.io');
 const io = new Server(server, {
     cors: {
-        origin: "http://localhost:5173", // Vite default port
+        origin: ["http://localhost:5173", "https://sevo-secure-voice.onrender.com"],
         methods: ["GET", "POST"]
     }
 });
