@@ -73,12 +73,12 @@ const VoiceRecorder = ({ onSend }) => {
   };
 
   return (
-    <div className="p-4 glass-card border-none shadow-xl flex items-center justify-between gap-4">
+    <div className="p-3 glass-card border-none shadow-xl flex items-center justify-between gap-3 w-full">
       {!audioBlob ? (
         <>
-          <div className="flex items-center gap-3">
-            <div className={`w-3 h-3 rounded-full ${isRecording ? 'bg-red-500 animate-pulse' : 'bg-white/20'}`} />
-            <span className="text-sm font-medium">{isRecording ? `${duration}s` : 'Ready to record'}</span>
+          <div className="flex items-center gap-2 min-w-0">
+            <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${isRecording ? 'bg-red-500 animate-pulse' : 'bg-white/20'}`} />
+            <span className="text-xs font-medium truncate">{isRecording ? `${duration}s` : 'Ready'}</span>
           </div>
           
           <button
@@ -86,11 +86,14 @@ const VoiceRecorder = ({ onSend }) => {
             onMouseUp={stopRecording}
             onTouchStart={startRecording}
             onTouchEnd={stopRecording}
-            className={`p-4 rounded-full transition-all duration-300 ${isRecording ? 'primary-gradient scale-125 shadow-lg' : 'bg-white/10 hover:bg-white/20'}`}
+            className={`p-3 rounded-full transition-all duration-300 flex-shrink-0 ${isRecording ? 'primary-gradient scale-110 shadow-lg ring-4 ring-[#41D1FF]/20' : 'bg-white/10 hover:bg-white/20 active:scale-95'}`}
           >
-            {isRecording ? <Square size={24} fill="white" /> : <Mic size={24} />}
+            {isRecording ? <Square size={20} fill="white" className="text-white" /> : <Mic size={20} />}
           </button>
-          <span className="text-xs text-white/40">Hold to speak</span>
+          
+          <div className="text-[10px] text-white/30 font-medium min-w-0 text-right">
+              {isRecording ? 'Recording...' : 'Hold & Speak'}
+          </div>
         </>
       ) : (
         <div className="flex items-center gap-4 w-full">
