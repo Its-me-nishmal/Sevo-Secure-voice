@@ -6,11 +6,17 @@ import Chat from './pages/Chat';
 import Login from './pages/Login';
 import Onboarding from './pages/Onboarding';
 import Settings from './pages/Settings';
+import AppLayout from './components/AppLayout';
 
-const PrivateRoute = ({ children }) => {
+const PrivateRoute = ({ children, hideNav }) => {
   const { user, loading } = useAuth();
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return (
+    <div className="h-screen bg-[#0d1117] flex items-center justify-center text-white/50 animate-pulse">
+      Loading Sevo...
+    </div>
+  );
+
   if (!user) return <Navigate to="/login" />;
 
   // Force onboarding if display name is missing
@@ -18,7 +24,7 @@ const PrivateRoute = ({ children }) => {
     return <Navigate to="/onboarding" />;
   }
 
-  return children;
+  return <AppLayout hideNav={hideNav}>{children}</AppLayout>;
 };
 
 function App() {
@@ -38,13 +44,13 @@ function App() {
             } />
 
             <Route path="/chat/:id" element={
-              <PrivateRoute>
+              <PrivateRoute hideNav>
                 <Chat />
               </PrivateRoute>
             } />
 
             <Route path="/onboarding" element={
-              <PrivateRoute>
+              <PrivateRoute hideNav>
                 <Onboarding />
               </PrivateRoute>
             } />

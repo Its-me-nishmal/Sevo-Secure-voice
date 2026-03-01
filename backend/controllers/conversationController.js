@@ -55,7 +55,28 @@ const listConversations = async (req, res) => {
     }
 };
 
+/**
+ * Get a single conversation
+ */
+const getConversation = async (req, res) => {
+    try {
+        const conversation = await Conversation.findOne({
+            _id: req.params.id,
+            $or: [{ userA: req.user._id }, { userB: req.user._id }]
+        }).populate('userA userB', 'displayName email').lean();
+
+        if (!conversation) {
+            return res.status(404).json({ message: 'Conversation not found' });
+        }
+
+        res.json(conversation);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = {
     getOrCreateConversation,
-    listConversations
+    listConversations,
+    getConversation
 };

@@ -1,18 +1,47 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
+@theme {
+  --color-bg-base: #07090E;
+  --color-surface: #12151C;
+  --color-surface-glass: rgba(255, 255, 255, 0.03);
+  --color-primary: #41D1FF;
+  --color-secondary: #BD34FE;
+
+  --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-float: float 3s ease-in-out infinite;
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+  }
+}
+
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'Outfit', system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
   color-scheme: dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #0d1117;
+  color: rgba(255, 255, 255, 0.9);
+  background-color: var(--color-bg-base);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* Global speedup: disable default transitions and animations */
+  transition-duration: 0.1s !important;
+  animation-duration: 0.1s !important;
+}
+
+/* Hard disable for those who want instant feel */
+@media (prefers-reduced-motion: no-preference) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
 }
 
 body {
@@ -20,21 +49,60 @@ body {
   display: flex;
   min-width: 320px;
   min-height: 100vh;
+  min-height: 100dvh;
+  /* Mobile viewport fix */
+  overscroll-behavior: none;
+  /* Prevent pull-to-refresh bounce */
+  -webkit-tap-highlight-color: transparent;
+
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Hide scrollbar for IE, Edge and Firefox */
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
+}
+
+/* Global scrollbar hide */
+*::-webkit-scrollbar {
+  display: none;
+}
+
+#root {
+  width: 100%;
+}
+
+* {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Prevent iOS zoom on inputs */
+input,
+select,
+textarea {
+  font-size: 16px !important;
 }
 
 /* Glassmorphism Classes */
 .glass-card {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
+  background: var(--color-surface-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 }
 
 .glass-navbar {
-    background: rgba(13, 17, 23, 0.8);
-    backdrop-filter: blur(8px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(7, 9, 14, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 /* Sevo Colors */
@@ -43,23 +111,25 @@ body {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #41D1FF 0%, #BD34FE 100%);
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: transform 0.2s, opacity 0.2s;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 14px;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 15px rgba(65, 209, 255, 0.2);
 }
 
 .btn-primary:hover {
-    transform: scale(1.02);
-    opacity: 0.9;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(189, 52, 254, 0.3);
 }
 
 .btn-primary:active {
-    transform: scale(0.98);
+  transform: translateY(1px) scale(0.98);
 }
 
 a {
@@ -67,6 +137,7 @@ a {
   color: #41D1FF;
   text-decoration: inherit;
 }
+
 a:hover {
   color: #BD34FE;
 }
