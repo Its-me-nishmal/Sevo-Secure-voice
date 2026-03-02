@@ -64,8 +64,28 @@ const blockUser = async (req, res) => {
     }
 };
 
+/**
+ * Get users who are discoverable
+ */
+const getDiscoverableUsers = async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id);
+        const exclusions = [req.user._id, ...(user.blockedUsers || [])];
+
+        const users = await User.find({
+            discoverableByEmail: true,
+            _id: { $nin: exclusions }
+        }).select('email displayName _id').limit(50);
+
+        res.json(users);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = {
     updateProfile,
     searchUserByEmail,
-    blockUser
+    blockUser,
+    getDiscoverableUsers
 };

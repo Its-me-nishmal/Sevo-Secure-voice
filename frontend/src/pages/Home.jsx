@@ -11,6 +11,9 @@ const Home = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [conversations, setConversations] = useState([]);
+  const [onlineUsers, setOnlineUsers] = useState([]);
+  const [discoverableUsers, setDiscoverableUsers] = useState([]);
+  const [activeTab, setActiveTab] = useState('All');
   const [searchEmail, setSearchEmail] = useState('');
   const [searchResult, setSearchResult] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
@@ -29,7 +32,12 @@ const Home = () => {
       fetchConversations();
     });
 
+    socket.current.on('online_users_update', (users) => {
+      setOnlineUsers(users);
+    });
+
     fetchConversations();
+    fetchDiscoverUsers();
     return () => socket.current.disconnect();
   }, []);
 
@@ -39,6 +47,17 @@ const Home = () => {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setConversations(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const fetchDiscoverUsers = async () => {
+    try {
+      const { data } = await axios.get(`${API_URL}/users/discover`, {
+        headers: { Authorization: `Bearer ${user.token}` }
+      });
+      setDiscoverableUsers(data);
     } catch (err) {
       console.error(err);
     }
@@ -71,6 +90,25 @@ const Home = () => {
       console.error(err);
     }
   };
+
+  const tabs = ['All', 'In Live', 'Unplayed', 'Discover'];
+
+  // Map conversations to include 'other' user resolution once
+  const mappedConversations = conversations.map(conv => ({
+    ...conv,
+    other: conv.userA._id === user._id ? conv.userB : conv.userA
+  }));
+
+  const filteredConversations = mappedConversations.filter(conv => {
+    if (activeTab === 'In Live') return onlineUsers.includes(conv.other._id);
+    if (activeTab === 'Unplayed') return conv.unplayedCount > 0;
+    return true; // For 'All', handle 'Discover' separately
+  });
+
+  // For Discover tab, filter out anyone we already have a conversation with
+  const filteredDiscoverUsers = discoverableUsers.filter(dUser =>
+    !mappedConversations.some(conv => conv.other._id === dUser._id)
+  );
 
   return (
     <div className="flex flex-col min-h-full">
@@ -110,16 +148,7 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Hero / Action */}
-      <div className="px-6 mb-6">
-        <div className="glass-card p-5 relative overflow-hidden group">
-          <div className="absolute top-[-20%] right-[-10%] w-32 h-32 bg-[#41D1FF]/10 blur-2xl rounded-full" />
-          <div className="relative z-10">
-            <h2 className="text-lg font-bold mb-1">Encrypted Audio</h2>
-            <p className="text-xs text-white/50 leading-relaxed">Your voice messages are encrypted end-to-end and expire automatically.</p>
-          </div>
-        </div>
-      </div>
+
 
       {/* Main Content */}
       <div className="px-6 space-y-6 flex-1">
@@ -150,65 +179,112 @@ const Home = () => {
           </div>
         )}
 
-        {/* Conversations List */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between px-1">
-            <h3 className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em]">Latest Conversations</h3>
-            <span className="text-[10px] font-medium text-[var(--color-primary)] bg-[var(--color-primary)]/10 px-2 py-0.5 rounded-full">{conversations.length} total</span>
-          </div>
+        {/* Tabs Control */}
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2">
+          {tabs.map(tab => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all ${activeTab === tab ? 'bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] text-white shadow-[0_0_15px_rgba(65,209,255,0.3)]' : 'bg-white/5 border border-white/10 text-white/50 hover:bg-white/10'}`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
 
-          {conversations.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-24 text-white/20 relative group">
-              <div className="absolute inset-0 bg-[var(--color-secondary)]/5 blur-[80px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
-              <MicIcon size={64} className="mb-6 opacity-30 transform group-hover:scale-110 transition-all duration-700" />
-              <p className="mt-4 text-[13px] tracking-[0.2em] uppercase font-bold text-white/30">Silence is golden...</p>
-              <p className="mt-2 text-xs text-white/20 max-w-[200px] text-center">Search for an email above to start a secure voice chat.</p>
-            </div>
-          ) : (
-            <div className="grid gap-3 pb-8">
-              {conversations.map(conv => {
-                const other = conv.userA._id === user._id ? conv.userB : conv.userA;
-                return (
-                  <div
-                    key={conv._id}
-                    onClick={() => navigate(`/chat/${conv._id}`)}
-                    className="group flex items-center gap-4 p-4 glass-card hover:bg-white/5 active:scale-[0.98] transition-all cursor-pointer border border-white/5 hover:border-[var(--color-primary)]/30"
-                  >
-                    <div className="relative">
-                      <div className="w-14 h-14 bg-gradient-to-tr from-[var(--color-surface)] to-[var(--color-bg-base)] border border-white/10 rounded-2xl flex items-center justify-center shadow-lg overflow-hidden group-hover:border-[var(--color-primary)]/50 transition-colors">
-                        <span className="font-bold text-xl text-white/80 group-hover:text-[var(--color-primary)] transition-colors">{other.displayName?.[0]?.toUpperCase() || '?'}</span>
-                      </div>
-                      {conv.unplayedCount > 0 && (
-                        <div className="absolute -top-1.5 -right-1.5 w-6 h-6 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] rounded-full border-[3px] border-[var(--color-bg-base)] flex items-center justify-center text-[10px] font-black text-white shadow-[0_0_10px_rgba(65,209,255,0.5)] animate-pulse-slow">
-                          {conv.unplayedCount}
+        {/* Content Area Based on Tab */}
+        <div className="space-y-4">
+          {activeTab === 'Discover' ? (
+            // DISCOVER TAB VIEW
+            <>
+              {filteredDiscoverUsers.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-20 text-white/20">
+                  <SearchIcon size={48} className="mb-4 opacity-30" />
+                  <p className="text-[12px] tracking-widest uppercase font-bold">No new users found</p>
+                </div>
+              ) : (
+                <div className="grid gap-3 pb-8">
+                  {filteredDiscoverUsers.map(dUser => (
+                    <div
+                      key={dUser._id}
+                      onClick={() => startChat(dUser._id)}
+                      className="group flex items-center justify-between p-4 glass-card hover:bg-[var(--color-primary)]/10 active:scale-[0.98] transition-all cursor-pointer border border-white/5 hover:border-[var(--color-primary)]/30"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] rounded-2xl flex items-center justify-center shadow-lg">
+                          <span className="font-bold text-lg text-white">{dUser.displayName?.[0]?.toUpperCase() || '?'}</span>
                         </div>
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-1">
-                        <p className="font-bold text-[15px] truncate text-white">{other.displayName}</p>
-                        <p className="text-[10px] text-white/30 font-semibold tracking-wide">
-                          {new Date(conv.updatedAt).toLocaleDateString([], { month: 'short', day: 'numeric' })}
-                        </p>
+                        <div>
+                          <p className="font-bold text-sm text-white">{dUser.displayName}</p>
+                          <p className="text-xs text-[var(--color-primary)]">Start new chat</p>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        {conv.unplayedCount > 0 ? (
-                          <div className="flex items-center gap-1.5">
-                            <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)] animate-pulse"></span>
-                            <span className="text-[12px] text-[var(--color-primary)] font-semibold truncate">Incoming voice message</span>
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-1.5">
-                            <MicIcon size={12} className="text-white/20" />
-                            <span className="text-[12px] text-white/30 font-medium truncate">Message played</span>
-                          </div>
-                        )}
+                      <div className="w-10 h-10 bg-[var(--color-primary)]/10 rounded-full flex items-center justify-center group-hover:bg-[var(--color-primary)]/20 transition-colors">
+                        <MessageIcon size={20} className="text-[var(--color-primary)] group-hover:scale-110 transition-transform" />
                       </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  ))}
+                </div>
+              )}
+            </>
+          ) : (
+            // CONVERSATIONS VIEW (ALL, IN LIVE, UNPLAYED)
+            <>
+              {filteredConversations.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-24 text-white/20 relative group">
+                  <div className="absolute inset-0 bg-[var(--color-secondary)]/5 blur-[80px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
+                  <MicIcon size={64} className="mb-6 opacity-30 transform group-hover:scale-110 transition-all duration-700" />
+                  <p className="mt-4 text-[13px] tracking-[0.2em] uppercase font-bold text-white/30">
+                    {activeTab === 'In Live' ? 'Nobody is online right now...' : activeTab === 'Unplayed' ? 'No unplayed messages' : 'Silence is golden...'}
+                  </p>
+                </div>
+              ) : (
+                <div className="grid gap-3 pb-8">
+                  {filteredConversations.map(conv => {
+                    const isOnline = onlineUsers.includes(conv.other._id);
+                    return (
+                      <div
+                        key={conv._id}
+                        onClick={() => navigate(`/chat/${conv._id}`)}
+                        className="group flex items-center gap-4 p-4 glass-card hover:bg-white/5 active:scale-[0.98] transition-all cursor-pointer border border-white/5 hover:border-[var(--color-primary)]/30"
+                      >
+                        <div className="relative">
+                          <div className={`w-14 h-14 bg-gradient-to-tr from-[var(--color-surface)] to-[var(--color-bg-base)] border border-white/10 rounded-2xl flex items-center justify-center shadow-lg overflow-hidden group-hover:border-[var(--color-primary)]/50 transition-colors ${isOnline ? 'ring-2 ring-green-400 ring-offset-2 ring-offset-[var(--color-bg-base)]' : ''}`}>
+                            <span className="font-bold text-xl text-white/80 group-hover:text-[var(--color-primary)] transition-colors">{conv.other.displayName?.[0]?.toUpperCase() || '?'}</span>
+                          </div>
+                          {conv.unplayedCount > 0 && (
+                            <div className="absolute -top-1.5 -right-1.5 w-6 h-6 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] rounded-full border-[3px] border-[var(--color-bg-base)] flex items-center justify-center text-[10px] font-black text-white shadow-[0_0_10px_rgba(65,209,255,0.5)] animate-pulse-slow">
+                              {conv.unplayedCount}
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between mb-1">
+                            <p className="font-bold text-[15px] truncate text-white">{conv.other.displayName}</p>
+                            <p className="text-[10px] text-white/30 font-semibold tracking-wide">
+                              {new Date(conv.updatedAt).toLocaleDateString([], { month: 'short', day: 'numeric' })}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {conv.unplayedCount > 0 ? (
+                              <div className="flex items-center gap-1.5">
+                                <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)] animate-pulse"></span>
+                                <span className="text-[12px] text-[var(--color-primary)] font-semibold truncate">Incoming voice message</span>
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-1.5">
+                                <MicIcon size={12} className="text-white/20" />
+                                <span className="text-[12px] text-white/30 font-medium truncate">Message played</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

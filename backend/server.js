@@ -50,6 +50,8 @@ const io = new Server(server, {
 
 app.set('io', io);
 
+const onlineUsers = new Set(); // Track online user IDs
+
 io.on('connection', (socket) => {
     console.log('User connected:', socket.id);
 
@@ -59,12 +61,26 @@ io.on('connection', (socket) => {
     });
 
     socket.on('join_personal', (userId) => {
+        socket.userId = userId;
         socket.join(userId);
         console.log(`User ${socket.id} joined personal room ${userId}`);
+
+        onlineUsers.add(userId);
+        io.emit('online_users_update', Array.from(onlineUsers));
     });
 
     socket.on('disconnect', () => {
         console.log('User disconnected:', socket.id);
+        if (socket.userId) {
+            // Delay slightly to confirm true disconnect vs reload
+            setTimeout(() => {
+                const userRoom = io.sockets.adapter.rooms.get(socket.userId);
+                if (!userRoom || userRoom.size === 0) {
+                    onlineUsers.delete(socket.userId);
+                    io.emit('online_users_update', Array.from(onlineUsers));
+                }
+            }, 500);
+        }
     });
 });
 
