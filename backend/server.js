@@ -71,12 +71,12 @@ io.on('connection', (socket) => {
 
     socket.on('typing_start', ({ conversationId, receiverId }) => {
         if (conversationId) socket.to(conversationId).emit('typing_start', { senderId: socket.userId, conversationId });
-        if (receiverId) socket.to(receiverId).emit('typing_start', { senderId: socket.userId, conversationId });
+        if (receiverId) io.to(receiverId).emit('typing_start', { senderId: socket.userId, conversationId });
     });
 
     socket.on('typing_stop', ({ conversationId, receiverId }) => {
         if (conversationId) socket.to(conversationId).emit('typing_stop', { senderId: socket.userId, conversationId });
-        if (receiverId) socket.to(receiverId).emit('typing_stop', { senderId: socket.userId, conversationId });
+        if (receiverId) io.to(receiverId).emit('typing_stop', { senderId: socket.userId, conversationId });
     });
 
     socket.on('disconnect', () => {
