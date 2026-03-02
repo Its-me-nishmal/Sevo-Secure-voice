@@ -23,6 +23,7 @@ const Chat = () => {
   useEffect(() => {
     // Initialize Socket
     socket.current = io(SOCKET_URL);
+    socket.current.emit('join_personal', user._id);
     socket.current.emit('join_conversation', id);
 
     socket.current.on('new_message', (message) => {

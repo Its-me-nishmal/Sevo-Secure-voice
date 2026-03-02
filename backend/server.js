@@ -11,7 +11,7 @@ const app = express();
 // Rate Limiting
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 500, // Increased from 100 to avoid 429s with polling/chat
+    max: 2000, // Increased from 100 to avoid 429s with polling/chat
     message: 'Too many requests from this IP, please try again after 15 minutes'
 });
 
