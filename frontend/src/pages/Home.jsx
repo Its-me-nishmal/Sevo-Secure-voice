@@ -12,6 +12,7 @@ const Home = () => {
   const navigate = useNavigate();
   const [conversations, setConversations] = useState([]);
   const [onlineUsers, setOnlineUsers] = useState([]);
+  const [typingUsers, setTypingUsers] = useState([]);
   const [discoverableUsers, setDiscoverableUsers] = useState([]);
   const [activeTab, setActiveTab] = useState('All');
   const [searchEmail, setSearchEmail] = useState('');
@@ -34,6 +35,14 @@ const Home = () => {
 
     socket.current.on('online_users_update', (users) => {
       setOnlineUsers(users);
+    });
+
+    socket.current.on('typing_start', ({ senderId }) => {
+      setTypingUsers(prev => [...new Set([...prev, senderId])]);
+    });
+
+    socket.current.on('typing_stop', ({ senderId }) => {
+      setTypingUsers(prev => prev.filter(id => id !== senderId));
     });
 
     fetchConversations();
@@ -266,9 +275,14 @@ const Home = () => {
                             </p>
                           </div>
                           <div className="flex items-center gap-2">
-                            {conv.unplayedCount > 0 ? (
+                            {typingUsers.includes(conv.other._id) ? (
+                              <div className="flex items-center gap-1.5 animate-in fade-in duration-300">
+                                <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.8)]" />
+                                <span className="text-[12px] text-green-400 font-bold tracking-wide animate-pulse">Recording...</span>
+                              </div>
+                            ) : conv.unplayedCount > 0 ? (
                               <div className="flex items-center gap-1.5">
-                                <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)] animate-pulse"></span>
+                                <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)] animate-pulse shadow-[0_0_5px_rgba(65,209,255,0.8)]"></span>
                                 <span className="text-[12px] text-[var(--color-primary)] font-semibold truncate">Incoming voice message</span>
                               </div>
                             ) : (

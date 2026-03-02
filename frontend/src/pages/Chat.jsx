@@ -14,6 +14,7 @@ const Chat = () => {
   const { user } = useAuth();
   const [messages, setMessages] = useState([]);
   const [otherUser, setOtherUser] = useState(null);
+  const [isOtherUserTyping, setIsOtherUserTyping] = useState(false);
   const socket = useRef(null);
   const scrollRef = useRef(null);
 
@@ -30,6 +31,14 @@ const Chat = () => {
 
     socket.current.on('message_played', ({ messageId }) => {
       setMessages(prev => prev.map(m => m._id === messageId ? { ...m, played: true } : m));
+    });
+
+    socket.current.on('typing_start', ({ senderId }) => {
+      setIsOtherUserTyping(true);
+    });
+
+    socket.current.on('typing_stop', ({ senderId }) => {
+      setIsOtherUserTyping(false);
     });
 
     // Fetch Messages & Conversation Info
@@ -95,6 +104,15 @@ const Chat = () => {
     }
   };
 
+  const handleRecordingStateChange = (isRecording) => {
+    if (!otherUser) return;
+    if (isRecording) {
+      socket.current.emit('typing_start', { conversationId: id, receiverId: otherUser._id });
+    } else {
+      socket.current.emit('typing_stop', { conversationId: id, receiverId: otherUser._id });
+    }
+  };
+
   return (
     <div className="flex flex-col h-full relative">
       {/* Header */}
@@ -109,10 +127,17 @@ const Chat = () => {
             </div>
             <div>
               <h2 className="font-bold text-[15px] leading-tight text-white mb-0.5 tracking-wide">{otherUser?.displayName || 'Secure Chat'}</h2>
-              <div className="flex items-center gap-1.5">
-                <div className="w-1.5 h-1.5 bg-[var(--color-primary)] rounded-full animate-pulse shadow-[0_0_8px_rgba(65,209,255,0.8)]" />
-                <p className="text-[10px] text-[var(--color-primary)] uppercase tracking-widest font-bold">End-to-End</p>
-              </div>
+              {isOtherUserTyping ? (
+                <div className="flex items-center gap-1.5 animate-in fade-in duration-300">
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.8)]" />
+                  <span className="text-[10px] text-green-400 font-bold uppercase tracking-widest animate-pulse">Recording...</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5">
+                  <div className="w-1.5 h-1.5 bg-[var(--color-primary)] rounded-full shadow-[0_0_8px_rgba(65,209,255,0.8)]" />
+                  <p className="text-[10px] text-[var(--color-primary)] uppercase tracking-widest font-bold">End-to-End</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -165,7 +190,7 @@ const Chat = () => {
 
       {/* Floating Input Area */}
       <div className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] left-0 right-0 z-40 px-4 w-full max-w-screen-md mx-auto">
-        <VoiceRecorder onSend={handleSendVoice} />
+        <VoiceRecorder onSend={handleSendVoice} onRecordingStateChange={handleRecordingStateChange} />
         <p className="text-center text-[9px] text-white/30 mt-3 flex items-center justify-center gap-1.5 font-bold tracking-[0.2em] bg-[var(--color-bg-base)]/50 backdrop-blur-md py-1 rounded-full w-max mx-auto px-4 border border-white/5">
           <ShieldAlertIcon size={12} className="text-[var(--color-secondary)] opacity-80" /> AUTO-DESTRUCTS IN 3 HOURS
         </p>

@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { MicIcon, SendIcon, XIcon, PlayIcon, PauseIcon } from './Icons';
 
-const VoiceRecorder = ({ onSend }) => {
+const VoiceRecorder = ({ onSend, onRecordingStateChange }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [audioBlob, setAudioBlob] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -34,6 +34,7 @@ const VoiceRecorder = ({ onSend }) => {
     isCancelledRef.current = false;
     isInstantSendRef.current = false;
     setIsRecording(true);
+    if (onRecordingStateChange) onRecordingStateChange(true);
     setDuration(0);
     durationRef.current = 0;
 
@@ -104,6 +105,7 @@ const VoiceRecorder = ({ onSend }) => {
   const stopInternal = () => {
     isRecordingRef.current = false;
     setIsRecording(false);
+    if (onRecordingStateChange) onRecordingStateChange(false);
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
