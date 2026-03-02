@@ -3,7 +3,6 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
-const startExpiryWorker = require('./services/expiryWorker');
 
 const rateLimit = require('express-rate-limit');
 
@@ -37,7 +36,6 @@ app.use((req, res, next) => {
 });
 
 app.use(express.json());
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Socket.io Setup
 const http = require('http');
@@ -85,8 +83,6 @@ const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/sevo';
 mongoose.connect(MONGODB_URI)
     .then(() => {
         console.log('Connected to MongoDB');
-        // Start Expiry Worker
-        startExpiryWorker();
 
         server.listen(PORT, () => {
             console.log(`Server running on port ${PORT}`);

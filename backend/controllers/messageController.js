@@ -1,8 +1,6 @@
 const Message = require('../models/Message');
 const Conversation = require('../models/Conversation');
 const User = require('../models/User');
-const path = require('path');
-const fs = require('fs');
 const { encrypt, decrypt } = require('../services/encryption');
 const { v4: uuidv4 } = require('uuid');
 
@@ -30,18 +28,6 @@ const sendVoiceMessage = async (req, res) => {
         }
 
         const encryptedBuffer = encrypt(req.file.buffer);
-        const fileName = `${uuidv4()}.enc`;
-        const uploadsDir = path.resolve(__dirname, '..', 'uploads');
-        
-        // Ensure directory exists
-        if (!fs.existsSync(uploadsDir)) {
-            fs.mkdirSync(uploadsDir, { recursive: true });
-        }
-
-        const filePath = path.join('uploads', fileName);
-        const fullPath = path.join(uploadsDir, fileName);
-
-        fs.writeFileSync(fullPath, encryptedBuffer);
 
         const expiresAt = new Date();
         expiresAt.setHours(expiresAt.getHours() + (parseInt(expiryHours) || 3));
@@ -49,7 +35,7 @@ const sendVoiceMessage = async (req, res) => {
         const message = await Message.create({
             conversationId,
             senderId: req.user._id,
-            filePath,
+            audioData: encryptedBuffer,
             durationSeconds,
             expiresAt,
             played: false
@@ -57,8 +43,11 @@ const sendVoiceMessage = async (req, res) => {
 
         // Emit via Socket.io
         const io = req.app.get('io');
+        const messageResponse = message.toObject();
+        delete messageResponse.audioData; // Critical: Remove giant binary buffer from socket push payload
+
         // Notify the specific conversation thread
-        io.to(conversationId).emit('new_message', { ...message.toObject(), localId: req.body.localId });
+        io.to(conversationId).emit('new_message', { ...messageResponse, localId: req.body.localId });
 
         // Notify both participants to refresh their conversation lists
         io.to(req.user._id.toString()).emit('refresh_conversations');
@@ -77,13 +66,9 @@ const sendVoiceMessage = async (req, res) => {
 const getVoiceFile = async (req, res) => {
     try {
         const message = await Message.findById(req.params.id);
-        if (!message) return res.status(404).json({ message: 'Message not found' });
+        if (!message || !message.audioData) return res.status(404).json({ message: 'Message not found or corrupted' });
 
-        const fullPath = path.resolve(__dirname, '..', message.filePath);
-        if (!fs.existsSync(fullPath)) return res.status(404).json({ message: 'File not found' });
-
-        const encryptedData = fs.readFileSync(fullPath);
-        const decryptedData = decrypt(encryptedData);
+        const decryptedData = decrypt(message.audioData);
 
         res.set('Content-Type', 'audio/webm');
         res.send(decryptedData);
@@ -127,7 +112,8 @@ const markAsPlayed = async (req, res) => {
 const getMessages = async (req, res) => {
     const { conversationId } = req.params;
     try {
-        const messages = await Message.find({ conversationId }).sort({ createdAt: 1 });
+        // Exclude audioData binary buffer to reduce load times significantly
+        const messages = await Message.find({ conversationId }).select('-audioData').sort({ createdAt: 1 });
         res.json(messages);
     } catch (error) {
         res.status(500).json({ message: error.message });

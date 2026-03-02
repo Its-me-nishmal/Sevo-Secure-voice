@@ -34,8 +34,9 @@ const listConversations = async (req, res) => {
             $or: [{ userA: req.user._id }, { userB: req.user._id }]
         }).populate('userA userB', 'displayName email').lean();
 
-        // Enhance with unplayed counts and last message
-        const enhancedConversations = await Promise.all(conversations.map(async (conv) => {
+        // Enhance with unplayed counts and check if any messages exist
+        const enhancedConversationsRaw = await Promise.all(conversations.map(async (conv) => {
+            const hasMessages = await Message.exists({ conversationId: conv._id });
             const unplayedMessages = await Message.find({
                 conversationId: conv._id,
                 senderId: { $ne: req.user._id }, // Only count messages sent by others
@@ -44,10 +45,14 @@ const listConversations = async (req, res) => {
 
             return {
                 ...conv,
+                hasMessages: !!hasMessages,
                 unplayedCount: unplayedMessages.length,
                 lastUnplayedId: unplayedMessages.length > 0 ? unplayedMessages[0]._id : null
             };
         }));
+
+        // Filter out empty conversations (e.g. ones where all messages expired)
+        const enhancedConversations = enhancedConversationsRaw.filter(conv => conv.hasMessages);
 
         res.json(enhancedConversations);
     } catch (error) {

@@ -11,8 +11,8 @@ const messageSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
-    filePath: {
-        type: String,
+    audioData: {
+        type: Buffer,
         required: true
     },
     durationSeconds: {
@@ -33,7 +33,7 @@ const messageSchema = new mongoose.Schema({
     }
 }, { timestamps: true });
 
-// Index for expiry worker
-messageSchema.index({ expiresAt: 1 });
+// Proper TTL Index: MongoDB automatically deletes documents when their expiresAt is reached.
+messageSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 module.exports = mongoose.model('Message', messageSchema);
